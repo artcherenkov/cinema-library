@@ -1,0 +1,18 @@
+{
+  "$schema": "../../node_modules/oxlint/configuration_schema.json",
+  "env": {
+    "browser": true,
+    "serviceworker": true,
+    "es2024": true
+  },
+  "plugins": ["eslint", "typescript", "unicorn", "oxc", "import", "react", "jsx-a11y"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn",
+    "perf": "warn"
+  },
+  "ignorePatterns": ["dist/**", "coverage/**"],
+  "rules": {
+    "react/react-in-jsx-scope": "off"
+  }
+}
