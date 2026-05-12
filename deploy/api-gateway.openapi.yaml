@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: cinema-library
+  version: 1.0.0
+
+paths:
+  /api:
+    x-yc-apigateway-any-method:
+      operationId: apiRoot
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
+  /api/{proxy+}:
+    x-yc-apigateway-any-method:
+      operationId: apiProxy
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
+  /:
+    get:
+      operationId: frontendRoot
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: cinema-library-b1gtquramiosn6217fk4
+        object: index.html
+        service_account_id: ajei3isboetkbs38rnuu
+
+  /{path+}:
+    get:
+      operationId: frontendProxy
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: object_storage
+        bucket: cinema-library-b1gtquramiosn6217fk4
+        object: "{path}"
+        error_object:
+          object: index.html
+          statusCode: 200
+        service_account_id: ajei3isboetkbs38rnuu
