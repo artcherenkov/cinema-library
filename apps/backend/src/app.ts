@@ -1,9 +1,15 @@
 import { Hono } from "hono";
 
-const app = new Hono();
+import { registerHealth } from "./routes/health.js";
 
-app.get("/health", (context) => {
-  return context.json({ status: "ok" });
-});
+function createApp(): Hono {
+  const app = new Hono();
 
-export { app };
+  registerHealth(app);
+
+  return app;
+}
+
+const app = createApp();
+
+export { app, createApp };
