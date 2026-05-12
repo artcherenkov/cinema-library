@@ -10,7 +10,7 @@
     "build": "pnpm -r build",
     "build:cloud-function": "node scripts/build-cloud-function.mjs",
     "publish:cloud-function": "node scripts/publish-cloud-function.mjs",
-    "build:frontend-artifact": "node scripts/build-frontend.mjs",
+    "build:frontend": "node scripts/build-frontend.mjs",
     "publish:frontend": "node scripts/publish-frontend.mjs",
     "typecheck": "pnpm -r typecheck",
     "lint": "pnpm -r lint",

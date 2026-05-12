@@ -14,7 +14,7 @@ async function main(argv, env) {
   const config = createConfig(normalizeArgv(argv), env);
   const paths = createPaths();
 
-  logStep("Проверяю frontend artifact");
+  logStep("Проверяю сборку фронтенда");
   await assertFrontendArtifact(paths);
 
   const artifactFiles = await collectArtifactFiles(paths.frontendArtifactDir);
@@ -22,7 +22,7 @@ async function main(argv, env) {
     artifactFiles,
   });
 
-  logStep(config.dryRun ? "Показываю план публикации" : "Публикую frontend в Object Storage");
+  logStep(config.dryRun ? "Показываю план публикации" : "Публикую фронтенд в Object Storage");
   publishPlan.forEach(config.dryRun ? printCommand : runCommand);
 
   logStep("Готово");
