@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "build": "pnpm -r build",
+    "build:cloud-function": "node scripts/build-cloud-function-artifact.mjs",
     "typecheck": "pnpm -r typecheck",
     "dev:frontend": "pnpm --filter @cinema-library/frontend dev",
     "dev:backend": "pnpm --filter @cinema-library/backend dev",

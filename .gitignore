@@ -1,3 +1,10 @@
 .idea
+.deploy
+.terraform
+*.tfstate
+*.tfstate.*
+*.tfplan
+artifacts
 node_modules
+dist
 .DS_Store
