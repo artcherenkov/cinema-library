@@ -22,7 +22,6 @@ type CloudFunctionResponse = {
   isBase64Encoded: false;
 };
 
-const apiBasePath = "/api";
 const requestOrigin = "https://api-gateway.local";
 
 async function handler(event: ApiGatewayEvent): Promise<CloudFunctionResponse> {
@@ -52,22 +51,9 @@ function toHonoRequest(event: ApiGatewayEvent): Request {
 }
 
 function toHonoRequestUrl(event: ApiGatewayEvent): URL {
-  const path = toHonoPath(event.rawPath);
   const query = event.rawQueryString === "" ? "" : `?${event.rawQueryString}`;
 
-  return new URL(`${path}${query}`, requestOrigin);
-}
-
-function toHonoPath(path: string): string {
-  if (path === apiBasePath || path === `${apiBasePath}/`) {
-    return "/";
-  }
-
-  if (!path.startsWith(`${apiBasePath}/`)) {
-    throw new Error(`Unexpected API Gateway path: ${path}`);
-  }
-
-  return path.slice(apiBasePath.length);
+  return new URL(`${event.rawPath}${query}`, requestOrigin);
 }
 
 function toHonoRequestHeaders(event: ApiGatewayEvent): Headers {

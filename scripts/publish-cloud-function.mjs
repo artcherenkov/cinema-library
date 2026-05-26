@@ -1,12 +1,14 @@
 import { spawnSync } from "node:child_process";
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseArgs } from "node:util";
+import { parseArgs, parseEnv } from "node:util";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const envPath = path.join(rootDir, ".env");
+const env = await readEnv(envPath, process.env);
 
-await main(process.argv.slice(2), process.env);
+await main(process.argv.slice(2), env);
 
 async function main(argv, env) {
   const config = createConfig(normalizeArgv(argv), env);
@@ -67,7 +69,68 @@ function createConfig(argv, env) {
     memory: values.memory ?? env.CLOUD_FUNCTION_MEMORY ?? "128MB",
     runtime: values.runtime ?? env.CLOUD_FUNCTION_RUNTIME ?? "nodejs22",
     serviceAccountId: values["service-account-id"] ?? env.CLOUD_FUNCTION_SERVICE_ACCOUNT_ID,
+    environment: readFunctionEnvironment(env),
+    secrets: readFunctionSecrets(env),
   };
+}
+
+async function readEnv(filePath, processEnv) {
+  try {
+    const fileEnv = parseEnv(await readFile(filePath, "utf8"));
+
+    return { ...fileEnv, ...processEnv };
+  } catch (error) {
+    if (error?.code === "ENOENT") {
+      return processEnv;
+    }
+
+    throw error;
+  }
+}
+
+function readFunctionEnvironment(env) {
+  return compactObject({
+    APP_BASE_URL: readRequiredEnv(env, "APP_BASE_URL"),
+    TELEGRAM_CLIENT_ID: readRequiredEnv(env, "TELEGRAM_CLIENT_ID"),
+    YDB_CONNECTION_STRING: readRequiredEnv(env, "YDB_CONNECTION_STRING"),
+    YDB_METADATA_CREDENTIALS: env.YDB_METADATA_CREDENTIALS,
+  });
+}
+
+function readFunctionSecrets(env) {
+  return [readSecret(env, "SESSION_SECRET"), readSecret(env, "TELEGRAM_CLIENT_SECRET")].filter(
+    (secret) => secret !== null,
+  );
+}
+
+function readSecret(env, environmentVariable) {
+  const prefix = environmentVariable;
+  const id = env[`${prefix}_ID`];
+
+  if (!id) {
+    return null;
+  }
+
+  return {
+    environmentVariable,
+    id,
+    key: readRequiredEnv(env, `${prefix}_KEY`),
+    versionId: env[`${prefix}_VERSION_ID`],
+  };
+}
+
+function compactObject(object) {
+  return Object.fromEntries(Object.entries(object).filter(([, value]) => value !== undefined));
+}
+
+function readRequiredEnv(env, name) {
+  const value = env[name];
+
+  if (!value) {
+    throw new Error(`Set ${name} in .env.`);
+  }
+
+  return value;
 }
 
 function createPaths() {
@@ -96,6 +159,8 @@ function createPublishCommand(config, paths) {
       config.executionTimeout,
       "--source-path",
       paths.artifactPath,
+      ...createEnvironmentArgs(config.environment),
+      ...createSecretArgs(config.secrets),
       ...createOptionalArg("--service-account-id", config.serviceAccountId),
       ...createOptionalArg("--description", config.description),
     ],
@@ -113,6 +178,29 @@ function createFunctionReferenceArgs(config) {
 
 function createOptionalArg(name, value) {
   return value ? [name, value] : [];
+}
+
+function createEnvironmentArgs(environment) {
+  return Object.entries(environment).flatMap(([name, value]) => [
+    "--environment",
+    `${name}=${value}`,
+  ]);
+}
+
+function createSecretArgs(secrets) {
+  return secrets.flatMap((secret) => [
+    "--secret",
+    [
+      `environment-variable=${secret.environmentVariable}`,
+      `id=${secret.id}`,
+      ...createSecretProperty("version-id", secret.versionId),
+      `key=${secret.key}`,
+    ].join(","),
+  ]);
+}
+
+function createSecretProperty(name, value) {
+  return value ? [`${name}=${value}`] : [];
 }
 
 function runCommand({ args, command }) {
