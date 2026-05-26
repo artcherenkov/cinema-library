@@ -4,6 +4,62 @@ info:
   version: 1.0.0
 
 paths:
+  /auth/session:
+    get:
+      operationId: authSession
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
+  /auth/logout:
+    post:
+      operationId: authLogout
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
+  /auth/telegram/start:
+    get:
+      operationId: authTelegramStart
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
+  /auth/telegram/callback:
+    get:
+      operationId: authTelegramCallback
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
+  /auth/{proxy+}:
+    x-yc-apigateway-any-method:
+      operationId: authProxy
+      parameters:
+        - name: proxy
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: cloud_functions
+        function_id: d4e0kgtlg4nbmgpf5eoo
+        tag: "$latest"
+        service_account_id: ajei3isboetkbs38rnuu
+        payload_format_version: "2.0"
+
   /api:
     x-yc-apigateway-any-method:
       operationId: apiRoot

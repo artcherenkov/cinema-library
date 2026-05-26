@@ -5,6 +5,7 @@ type ApiGatewayEvent = {
   rawPath: string;
   rawQueryString: string;
   headers: Record<string, string | undefined>;
+  cookies?: string[];
   requestContext: {
     http: {
       method: string;
@@ -22,7 +23,6 @@ type CloudFunctionResponse = {
   isBase64Encoded: false;
 };
 
-const apiBasePath = "/api";
 const requestOrigin = "https://api-gateway.local";
 
 async function handler(event: ApiGatewayEvent): Promise<CloudFunctionResponse> {
@@ -52,22 +52,9 @@ function toHonoRequest(event: ApiGatewayEvent): Request {
 }
 
 function toHonoRequestUrl(event: ApiGatewayEvent): URL {
-  const path = toHonoPath(event.rawPath);
   const query = event.rawQueryString === "" ? "" : `?${event.rawQueryString}`;
 
-  return new URL(`${path}${query}`, requestOrigin);
-}
-
-function toHonoPath(path: string): string {
-  if (path === apiBasePath || path === `${apiBasePath}/`) {
-    return "/";
-  }
-
-  if (!path.startsWith(`${apiBasePath}/`)) {
-    throw new Error(`Unexpected API Gateway path: ${path}`);
-  }
-
-  return path.slice(apiBasePath.length);
+  return new URL(`${event.rawPath}${query}`, requestOrigin);
 }
 
 function toHonoRequestHeaders(event: ApiGatewayEvent): Headers {
@@ -77,6 +64,10 @@ function toHonoRequestHeaders(event: ApiGatewayEvent): Headers {
     if (value !== undefined && shouldKeepRequestHeader(name)) {
       headers.append(name, value);
     }
+  }
+
+  if (event.cookies !== undefined && event.cookies.length > 0) {
+    headers.set("cookie", event.cookies.join("; "));
   }
 
   return headers;
@@ -150,5 +141,5 @@ function readSetCookieHeaders(headers: Headers): string[] {
   return headersWithCookies.getSetCookie?.() ?? [];
 }
 
-export { handler };
+export { handler, toHonoRequest };
 export type { ApiGatewayEvent, CloudFunctionResponse };

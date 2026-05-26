@@ -41,6 +41,7 @@ export default defineConfig({
       registerType: "prompt",
       workbox: {
         globPatterns: ["**/*.{css,html,js,png,svg,woff2}"],
+        navigateFallbackDenylist: [/^\/api(?:\/|$)/, /^\/auth(?:\/|$)/],
         navigateFallback: "/index.html",
       },
     }),
@@ -50,9 +51,12 @@ export default defineConfig({
   },
   server: {
     proxy: {
+      "/auth": {
+        changeOrigin: true,
+        target: "http://localhost:3001",
+      },
       "/api": {
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
         target: "http://localhost:3001",
       },
     },

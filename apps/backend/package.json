@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/adapters/local-server.ts",
     "build": "tsup",
+    "test": "node --import tsx --test \"src/**/*.test.ts\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "start": "node dist/local.js",
     "lint": "oxlint .",
@@ -16,7 +17,12 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.14",
-    "hono": "^4.12.18"
+    "@ydbjs/auth": "^6.2.1",
+    "@ydbjs/core": "^6.1.1",
+    "@ydbjs/query": "^6.1.0",
+    "@ydbjs/value": "^6.0.7",
+    "hono": "^4.12.18",
+    "jose": "^6.2.3"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",
