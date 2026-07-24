@@ -21,7 +21,7 @@
     "@ydbjs/core": "^6.1.1",
     "@ydbjs/query": "^6.1.0",
     "@ydbjs/value": "^6.0.7",
-    "hono": "^4.12.18",
+    "hono": "^4.12.27",
     "jose": "^6.2.3"
   },
   "devDependencies": {
